@@ -1,0 +1,3 @@
+- import_playbook: jenkins.yml
+# - import_playbook: kubernetes_master.yml
+# - import_playbook: kubernetes_slave.yml

@@ -1,0 +1,2 @@
+java_package: "openjdk-17-jdk"
+jenkins_port: 8080

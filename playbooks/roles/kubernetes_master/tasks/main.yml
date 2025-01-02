@@ -1,0 +1,45 @@
+
+
+- name:  Pull the CRI
+  shell: |
+    kubeadm config images pull --cri-socket unix:///run/containerd/containerd.sock
+- name: initilize the kubernetes cluster
+  shell: | 
+    kubeadm init  --pod-network-cidr=192.168.0.0/16
+- name: make a kubeconfig directory
+  file:
+    name: "{{ ansible_env.HOME }}/.kube"
+    state: directory
+    mode: '0755'
+- name: copy the admin conf to home folder
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ ansible_env.HOME }}/.kube/config"
+    remote_src: true
+
+- name: Change ownership of the kubeconfig file
+  file:
+    path: "{{ ansible_env.HOME }}/.kube/config"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    state: file
+- name: install network plugin
+  shell: |
+    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
+
+- name: Generate Kubernetes join token
+  shell: kubeadm token create --print-join-command
+  register: kubeToken
+
+- name: Save the token to a file
+  copy:
+    content: "{{ kubeToken.stdout }}"
+    dest: /tmp/kube_join_command.txt
+
+- name: Verify the token file exists on the master
+  shell: cat /tmp/kube_join_command.txt
+  register: master_token_file
+
+- name: Debug token content on master
+  debug:
+    var: master_token_file.stdout

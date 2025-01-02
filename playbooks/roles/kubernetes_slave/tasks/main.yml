@@ -1,0 +1,21 @@
+- name: Fetch token file from master to slave
+  fetch:
+    src: /tmp/kube_join_command.txt
+    dest: /tmp/kube_join_command.txt
+    flat: yes
+  delegate_to: 47.237.163.240
+
+- name: Check if the token file exists on the slave
+  stat:
+    path: /tmp/kube_join_command.txt
+  register: slave_token_file
+
+- name: Debug token file existence on slave
+  debug:
+    msg: "Token file exists: {{ slave_token_file.stat.exists }}"
+
+- name: Use the token to join the cluster
+  shell: |
+    bash /tmp/kube_join_command.txt
+  args:
+    executable: /bin/bash

@@ -1,0 +1,7 @@
+- name: Configure Kubernetes Slave
+  hosts: kubernetes_slave
+  become: yes
+  roles:
+    - common
+    - kubernetes_slave
+
